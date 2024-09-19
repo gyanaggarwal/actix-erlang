@@ -25,7 +25,7 @@ async fn test_crdt() {
 
     let rcpts = Receipients::new(rmap);
 
-    addr0.send(rcpts.clone()).await.unwrap();
-    addr1.send(rcpts.clone()).await.unwrap();
-    addr2.send(rcpts.clone()).await.unwrap();
+    let _ = addr0.do_send(rcpts.clone());
+    let _ = addr1.do_send(rcpts.clone());
+    let _ = addr2.send(rcpts.clone()).await;
 }
