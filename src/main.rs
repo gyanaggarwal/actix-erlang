@@ -5,9 +5,9 @@ use actix_erlang::actix_erl::{CrdtActor, Receipients};
 
 #[actix::main]
 async fn main() {
-    let _ = test_crdt().await;
+    test_crdt().await;
+    System::current().stop();
 }
-
 
 async fn test_crdt() {
     let mut rmap: HashMap<u16, Addr<CrdtActor>>= HashMap::new();

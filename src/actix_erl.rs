@@ -6,7 +6,8 @@ type NodeType = u16;
 type RecValue = Addr<CrdtActor>;
 type NRMap = HashMap<NodeType, RecValue>;
 
-#[derive(Clone)]
+#[derive(Message, Clone)]
+#[rtype(result = "()")]
 pub struct UserMsg {
     pub msg_value: u64
 }
@@ -15,10 +16,6 @@ impl UserMsg {
     pub fn new(msg_value: u64) -> Self {
         Self{msg_value}
     }
-}
-
-impl Message for UserMsg {
-    type Result = Result<RecValue, ()>;
 }
 
 #[derive(Message, Clone)]
@@ -72,9 +69,9 @@ impl Handler<PeerMsg> for CrdtActor {
 }
 
 impl Handler<UserMsg> for CrdtActor {
-    type Result = Result<RecValue, ()>;
+    type Result = ();
 
-    fn handle(&mut self, msg: UserMsg, ctx: &mut Self::Context) -> Self::Result {
+    fn handle(&mut self, msg: UserMsg, _ctx: &mut Self::Context) -> Self::Result {
         self.crdt_value += msg.msg_value;
         let peer_msg = PeerMsg::new(msg.msg_value); 
         if let Some(rec) = &self.receipients {
@@ -82,7 +79,8 @@ impl Handler<UserMsg> for CrdtActor {
                 addr.do_send(peer_msg.clone());
             }
         }
-        Ok(ctx.address())
+        
+        println!("self:handle:user_msg {:?}", self);
     }
 }
 
