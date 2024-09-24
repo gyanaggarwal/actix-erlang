@@ -38,7 +38,7 @@ impl Handler<UserMsg<CounterOpsStruct>> for CRDT<CounterCrdtStruct, CounterOpsSt
                 addr.do_send(peer_msg.clone());
             }
         }
-        println!("self.handler.user_msg {:?} {:?}", self.node, self.query());
+        println!("self.handler.user_msg {:?} {:?} {:?}", self.state, self.node, self.query());
     }
 }
 
@@ -47,7 +47,7 @@ impl Handler<PeerMsg<CounterOpsStruct>> for CRDT<CounterCrdtStruct, CounterOpsSt
 
     fn handle(&mut self, msg: PeerMsg<CounterOpsStruct>, _ctx: &mut Self::Context) -> Self::Result {
         self.process_ops_instance(&msg.user_msg.ops_instance);  
-        println!("self.handler.peer_msg {:?} {:?}", self.node, self.query());
+        println!("self.handler.peer_msg {:?} {:?} {:?}", self.state, self.node, self.query());
     }
 }
 
