@@ -2,27 +2,35 @@ use actix::prelude::*;
 use std::collections::HashMap;
 use rand::prelude::*;
 
-use actix_erlang::actix_erl::{CrdtActor, Receipients, UserMsg};
+use actix_erlang::crdt::{CRDT, CrdtType, SDPOpsType, Receipients};
+use actix_erlang::gcnt_crdt::{GCounter, CounterCrdtStruct, CounterOpsStruct, user_msg};
 
 #[actix::main]
 async fn main() {
-    test_crdt().await;
+    let _ = test_crdt().await;
     System::current().stop();
 }
 
-async fn test_crdt() {
-    let mut rmap: HashMap<u16, Addr<CrdtActor>>= HashMap::new();
+async fn test_crdt () {
+    let mut rmap = HashMap::new();
 
-    let crdt0 = CrdtActor::new(0);
-    let crdt1 = CrdtActor::new(1);
-    let crdt2 = CrdtActor::new(2);
+    let crdt_value = CounterCrdtStruct::new();
 
+    let node0: u16 = 0;
+    let node1: u16 = 1;
+    let node2: u16 = 2;
+
+    let crdt0: CRDT<CounterCrdtStruct, CounterOpsStruct, GCounter> = CRDT::new(node0, crdt_value.clone(), CrdtType::GCounterCrdt);
+    let crdt1: CRDT<CounterCrdtStruct, CounterOpsStruct, GCounter> = CRDT::new(node1, crdt_value.clone(), CrdtType::GCounterCrdt);
+    let crdt2: CRDT<CounterCrdtStruct, CounterOpsStruct, GCounter> = CRDT::new(node2, crdt_value.clone(), CrdtType::GCounterCrdt);
+ 
     let addr0 = crdt0.start();
     let addr1 = crdt1.start();
     let addr2 = crdt2.start();
-    rmap.insert(0, addr0.clone());
-    rmap.insert(1, addr1.clone());
-    rmap.insert(2, addr2.clone());
+
+    rmap.insert(node0, addr0.clone());
+    rmap.insert(node1, addr1.clone());
+    rmap.insert(node2, addr2.clone());
 
     let rcpts = Receipients::new(rmap);
 
@@ -31,9 +39,9 @@ async fn test_crdt() {
     let _ = addr2.send(rcpts.clone()).await;
 
     for _i in 0..20 {
-        let node_index = get_rand(0, 3);
+        let node_index = get_rand(0, 3) as u16;
         let value = get_rand(1, 20) as u64;
-        let user_msg = UserMsg::new(value);
+        let user_msg = user_msg(node_index, SDPOpsType::SDPAdd, value);
 
         match node_index {
             0 => addr0.send(user_msg).await.unwrap(),
