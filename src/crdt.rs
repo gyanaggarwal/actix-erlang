@@ -131,7 +131,7 @@ impl <CrdtValue: Clone+std::marker::Unpin+'static,
             .collect();
         self.receipients = Some(fmap);
 
-        println!("self.handle.rcpts {:?} {:?}", self.node, self.receipients);
+        println!("self.handler.rcpts {:?} {:?}", self.node, self.receipients);
     }
 }
 

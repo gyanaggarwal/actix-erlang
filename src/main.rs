@@ -3,15 +3,15 @@ use std::collections::HashMap;
 use rand::prelude::*;
 
 use actix_erlang::crdt::{CRDT, CrdtType, SDPOpsType, Receipients};
-use actix_erlang::gcnt_crdt::{GCounter, CounterCrdtStruct, CounterOpsStruct, user_msg};
+use actix_erlang::gcnt_crdt::{self, GCounter, CounterCrdtStruct, CounterOpsStruct};
 
 #[actix::main]
 async fn main() {
-    let _ = test_crdt().await;
+    let _ = test_gcounter().await;
     System::current().stop();
 }
 
-async fn test_crdt () {
+async fn test_gcounter () {
     let mut rmap = HashMap::new();
 
     let crdt_value = CounterCrdtStruct::new();
@@ -41,7 +41,7 @@ async fn test_crdt () {
     for _i in 0..20 {
         let node_index = get_rand(0, 3) as u16;
         let value = get_rand(1, 20) as u64;
-        let user_msg = user_msg(node_index, SDPOpsType::SDPAdd, value);
+        let user_msg = gcnt_crdt::user_msg(node_index, SDPOpsType::SDPAdd, value);
 
         match node_index {
             0 => addr0.send(user_msg).await.unwrap(),
